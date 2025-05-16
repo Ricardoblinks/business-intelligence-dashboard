@@ -8,14 +8,23 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       const initMocks = async () => {
-        const { worker } = await import('../mocks/browser');
-        // Start the MSW worker
-        worker.start({
-          onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-        });
+        if (typeof window === 'undefined') {
+          return;
+        }
+        
+        try {
+          const { worker } = await import('../mocks/browser');
+          // Start the MSW worker
+          worker.start({
+            onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+          });
+          console.log('MSW worker started successfully');
+        } catch (error) {
+          console.error('Error starting MSW worker:', error);
+        }
       };
       
-      initMocks();
+      initMocks().catch(console.error);
     }
   }, []);
   

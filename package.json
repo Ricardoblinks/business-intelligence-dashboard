@@ -1,14 +1,14 @@
 {
   "name": "business-intelligence-dashboard",
   "version": "1.0.0",
-  "description": "",
+  "description": "A mini business intelligence tool with user authentication and data visualization",
   "homepage": "/",
   "bugs": {
-    "url": "https://github.com/ricardoblinks/business-intelligence-dashboard/issues"
+    "url": "https://github.com/yourusername/business-intelligence-dashboard/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ricardoblinks/business-intelligence-dashboard.git"
+    "url": "git+https://github.com/yourusername/business-intelligence-dashboard.git"
   },
   "license": "ISC",
   "author": "",
@@ -30,7 +30,11 @@
     "autoprefixer": "^10.4.14",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.12",
+    "msw": "^1.2.1",
     "postcss": "^8.4.27",
     "tailwindcss": "^3.3.3"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }

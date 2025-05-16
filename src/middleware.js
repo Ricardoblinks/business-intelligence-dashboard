@@ -5,10 +5,15 @@ export function middleware(request) {
   const { pathname } = request.nextUrl;
   
   // Check if the path is protected
-  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/analytics') || pathname.startsWith('/settings');
+  const isProtectedRoute = pathname.startsWith('/dashboard') || 
+                           pathname.startsWith('/analytics') || 
+                           pathname.startsWith('/settings') ||
+                           pathname.startsWith('/customers') ||
+                           pathname.startsWith('/reports');
   
-  // Check auth status from the cookies
-  const token = request.cookies.get('token')?.value;
+  // Check auth status from the cookies or localStorage
+  const token = request.cookies.get('token')?.value || 
+                (typeof window !== 'undefined' && localStorage.getItem('token'));
   
   // If it's a protected route and there's no token, redirect to login
   if (isProtectedRoute && !token) {
@@ -18,7 +23,7 @@ export function middleware(request) {
   }
   
   // If it's login or register and user is already logged in, redirect to dashboard
-  if ((pathname === '/login' || pathname === '/register') && token) {
+  if ((pathname === '/login' || pathname === '/register' || pathname === '/') && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   
@@ -28,5 +33,14 @@ export function middleware(request) {
 
 // Specify which routes this middleware will run on
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register', '/settings/:path*', '/analytics/:path*'],
+  matcher: [
+    '/',
+    '/dashboard/:path*', 
+    '/login', 
+    '/register', 
+    '/settings/:path*', 
+    '/analytics/:path*',
+    '/customers/:path*',
+    '/reports/:path*'
+  ],
 };
