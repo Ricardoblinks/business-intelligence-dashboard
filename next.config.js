@@ -14,32 +14,15 @@ const nextConfig = {
     NEXT_PUBLIC_APP_NAME: 'BizInsight Dashboard',
     NEXT_PUBLIC_APP_VERSION: '1.0.0',
   },
-  // Customize webpack config if needed
-  webpack: (config, { isServer, dev }) => {
-    // Custom webpack configurations
-    return config;
-  },
-  // Internationalization settings if needed
-  // i18n: {
-  //   locales: ['en', 'fr', 'es'],
-  //   defaultLocale: 'en',
-  // },
-  // Handle redirects if needed
+  // Modify redirects to avoid conflicts with middleware
   async redirects() {
     return [
       {
-        source: '/',
-        destination: '/dashboard',
-        permanent: true,
+        source: '/api/auth/:path*',
+        destination: '/:path*',
+        permanent: false,
       },
     ];
-  },
-  // Error handling
-  onDemandEntries: {
-    // Period (in ms) where the server will keep pages in the buffer
-    maxInactiveAge: 25 * 1000,
-    // Number of pages that should be kept simultaneously without being disposed
-    pagesBufferLength: 2,
   },
 };
 

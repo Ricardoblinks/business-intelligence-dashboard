@@ -2,7 +2,6 @@
 // API request handlers for Mock Service Worker
 
 import { rest } from 'msw';
-import { generateToken } from '../utils/auth';
 
 // Mock database
 const mockUsers = [
@@ -13,6 +12,12 @@ const mockUsers = [
     password: 'password123',
   }
 ];
+
+// Helper function to generate token
+const generateToken = () => {
+  return Math.random().toString(36).substring(2, 15) + 
+         Math.random().toString(36).substring(2, 15);
+};
 
 export const handlers = [
   // Login handler
@@ -97,8 +102,6 @@ export const handlers = [
       ctx.json({ success: true })
     );
   }),
-  
-  // Implement API endpoints for mock data in the dashboard
   
   // Users API
   rest.get('/api/users', (req, res, ctx) => {

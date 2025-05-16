@@ -5,26 +5,30 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
-  // Initialize Mock Service Worker in development and production environments
+  // Initialize Mock Service Worker in development
   useEffect(() => {
     const initMocks = async () => {
       if (typeof window === 'undefined') {
         return;
       }
       
-      try {
-        const { worker } = await import('../mocks/browser');
-        // Start the MSW worker
-        await worker.start({
-          onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-        });
-        console.log('MSW worker started successfully');
-      } catch (error) {
-        console.error('Error starting MSW worker:', error);
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const { worker } = await import('../mocks/browser');
+          // Start the MSW worker
+          if (worker) {
+            await worker.start({
+              onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+            });
+            console.log('MSW worker started successfully');
+          }
+        } catch (error) {
+          console.error('Error starting MSW worker:', error);
+        }
       }
     };
     
-    initMocks().catch(console.error);
+    initMocks();
   }, []);
   
   return (
