@@ -1,5 +1,4 @@
-
-import { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 
 // Create auth context
@@ -15,32 +14,47 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    const storedRememberMe = localStorage.getItem('rememberMe') === 'true';
-    
-    if (storedUser && storedToken) {
+    const checkAuth = () => {
       try {
-        setUser(JSON.parse(storedUser));
-        setRememberMe(storedRememberMe);
+        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
+        const storedRememberMe = localStorage.getItem('rememberMe') === 'true';
+        
+        if (storedUser && storedToken) {
+          setUser(JSON.parse(storedUser));
+          setRememberMe(storedRememberMe);
+          setLastActivity(Date.now());
+        }
       } catch (err) {
         console.error('Failed to parse stored user', err);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('rememberMe');
+      } finally {
+        setLoading(false);
       }
-    }
+    };
     
-    setLoading(false);
+    checkAuth();
   }, []);
 
-  // Handle user inactivity
+  // Handle user inactivity - Auto logout feature
   useEffect(() => {
     // Don't track inactivity if user isn't logged in or has remember me enabled
     if (!user || rememberMe) return;
 
     const resetTimer = () => setLastActivity(Date.now());
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    
+    // Events that reset the inactivity timer
+    const events = [
+      'mousedown', 
+      'mousemove', 
+      'keypress', 
+      'scroll', 
+      'touchstart',
+      'click',
+      'keydown'
+    ];
     
     // Add event listeners to reset timer on user activity
     events.forEach(event => {
@@ -52,6 +66,7 @@ export const AuthProvider = ({ children }) => {
       const inactiveTime = Date.now() - lastActivity;
       // Logout after 1 minute of inactivity (60000ms)
       if (inactiveTime > 60000) {
+        console.log('Auto logout due to inactivity');
         logout();
       }
     }, 10000);
@@ -86,15 +101,15 @@ export const AuthProvider = ({ children }) => {
       
       const data = await response.json();
       
+      // Set user state and last activity
       setUser(data.user);
       setRememberMe(rememberMeOption);
+      setLastActivity(Date.now());
       
-      // Store in localStorage if remember me is selected
-      if (rememberMeOption) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('rememberMe', 'true');
-      }
+      // Store in localStorage if remember me is selected or for session
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('rememberMe', rememberMeOption ? 'true' : 'false');
       
       return data.user;
     } catch (err) {
@@ -125,10 +140,6 @@ export const AuthProvider = ({ children }) => {
       }
       
       const data = await response.json();
-      
-      // Set user data but don't automatically log in
-      setUser(data.user);
-      
       return data.user;
     } catch (err) {
       setError(err.message || 'Registration failed');
@@ -156,7 +167,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('rememberMe');
-      router.push('/login');
+      
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
+        router.push('/login');
+      }
     }
   }, [router]);
 

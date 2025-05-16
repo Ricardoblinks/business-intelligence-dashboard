@@ -14,6 +14,8 @@ import {
   getRevenueByCategory,
   getSessions
 } from '../lib/mockApi';
+import useInactivityTimer from '../hooks/useInactivityTimer';
+import useAuth from '../hooks/useAuth';
 
 const Dashboard = () => {
   // State for data
@@ -24,6 +26,10 @@ const Dashboard = () => {
   const [salesTrend, setSalesTrend] = useState([]);
   const [userGrowth, setUserGrowth] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
+  const { rememberMe } = useAuth();
+  
+  // Use the inactivity timer hook if "Keep me logged in" is not checked
+  useInactivityTimer(60000, !rememberMe);
   
   // Fetch data on component mount
   useEffect(() => {

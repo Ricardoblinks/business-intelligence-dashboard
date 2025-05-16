@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
@@ -13,8 +12,16 @@ const LoginForm = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
+  
+  // Check for successful registration message
+  useEffect(() => {
+    if (router.query.registered === 'true') {
+      setRegistrationSuccess(true);
+    }
+  }, [router.query]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +43,15 @@ const LoginForm = () => {
     }
   };
 
+  // For demo purposes, pre-fill with test credentials on mount
+  useEffect(() => {
+    // Only fill in development environment
+    if (process.env.NODE_ENV === 'development') {
+      setEmail('test@example.com');
+      setPassword('password123');
+    }
+  }, []);
+
   return (
     <AuthLayout 
       title="Sign in to your account" 
@@ -45,6 +61,14 @@ const LoginForm = () => {
         {error && (
           <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 p-4">
             <p className="text-sm text-red-700 dark:text-red-200">{error}</p>
+          </div>
+        )}
+        
+        {registrationSuccess && (
+          <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-500 p-4">
+            <p className="text-sm text-green-700 dark:text-green-200">
+              Registration successful! You can now log in with your credentials.
+            </p>
           </div>
         )}
         
@@ -97,6 +121,14 @@ const LoginForm = () => {
               Forgot your password?
             </Link>
           </div>
+        </div>
+        
+        <div className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+          {!rememberMe && (
+            <p>
+              You will be automatically logged out after 1 minute of inactivity.
+            </p>
+          )}
         </div>
 
         <div>

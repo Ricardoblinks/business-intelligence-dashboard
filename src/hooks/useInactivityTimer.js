@@ -2,20 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 import useAuth from './useAuth';
 
 const useInactivityTimer = (timeout = 60000, enabled = true) => {
-  const [lastActivity, setLastActivity] = useState(Date.now());
   const [isInactive, setIsInactive] = useState(false);
-  const { logout, rememberMe } = useAuth();
+  const { logout, rememberMe, setLastActivity } = useAuth();
 
   const resetTimer = useCallback(() => {
-    setLastActivity(Date.now());
+    const now = Date.now();
+    setLastActivity(now);
     setIsInactive(false);
-  }, []);
+  }, [setLastActivity]);
 
   useEffect(() => {
     // Don't track inactivity if disabled or remember me is enabled
     if (!enabled || rememberMe) return;
 
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    const events = [
+      'mousedown', 
+      'mousemove', 
+      'keypress', 
+      'scroll', 
+      'touchstart',
+      'click',
+      'keydown'
+    ];
     
     // Add event listeners to reset timer on user activity
     events.forEach(event => {
@@ -24,8 +32,12 @@ const useInactivityTimer = (timeout = 60000, enabled = true) => {
 
     // Check for inactivity every 10 seconds
     const interval = setInterval(() => {
-      const inactiveTime = Date.now() - lastActivity;
-      // Logout after specified timeout
+      const lastActivityTime = localStorage.getItem('lastActivity');
+      if (!lastActivityTime) return;
+      
+      const inactiveTime = Date.now() - parseInt(lastActivityTime, 10);
+      
+      // Check if inactive for longer than timeout
       if (inactiveTime > timeout) {
         setIsInactive(true);
         logout();
@@ -39,9 +51,9 @@ const useInactivityTimer = (timeout = 60000, enabled = true) => {
       });
       clearInterval(interval);
     };
-  }, [lastActivity, timeout, enabled, rememberMe, logout, resetTimer]);
+  }, [timeout, enabled, rememberMe, logout, resetTimer]);
 
-  return { lastActivity, isInactive, resetTimer };
+  return { isInactive, resetTimer };
 };
 
 export default useInactivityTimer;

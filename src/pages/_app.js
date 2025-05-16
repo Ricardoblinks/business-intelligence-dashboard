@@ -1,39 +1,47 @@
 import { useEffect } from 'react';
+import Head from 'next/head';
 import { AuthProvider } from '../contexts/AuthContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
-  // Initialize Mock Service Worker in development environment
+  // Initialize Mock Service Worker in development and production environments
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      const initMocks = async () => {
-        if (typeof window === 'undefined') {
-          return;
-        }
-        
-        try {
-          const { worker } = await import('../mocks/browser');
-          // Start the MSW worker
-          worker.start({
-            onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-          });
-          console.log('MSW worker started successfully');
-        } catch (error) {
-          console.error('Error starting MSW worker:', error);
-        }
-      };
+    const initMocks = async () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
       
-      initMocks().catch(console.error);
-    }
+      try {
+        const { worker } = await import('../mocks/browser');
+        // Start the MSW worker
+        await worker.start({
+          onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+        });
+        console.log('MSW worker started successfully');
+      } catch (error) {
+        console.error('Error starting MSW worker:', error);
+      }
+    };
+    
+    initMocks().catch(console.error);
   }, []);
   
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </AuthProvider>
+    <>
+      <Head>
+        <title>BizInsight Dashboard</title>
+        <meta name="description" content="Business Intelligence Dashboard" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/* Add favicon */}
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <AuthProvider>
+        <ThemeProvider>
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </AuthProvider>
+    </>
   );
 }
 

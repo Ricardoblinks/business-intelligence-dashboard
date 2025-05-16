@@ -6,14 +6,14 @@ export function middleware(request) {
   
   // Check if the path is protected
   const isProtectedRoute = pathname.startsWith('/dashboard') || 
-                           pathname.startsWith('/analytics') || 
-                           pathname.startsWith('/settings') ||
-                           pathname.startsWith('/customers') ||
-                           pathname.startsWith('/reports');
+                          pathname.startsWith('/analytics') || 
+                          pathname.startsWith('/settings') ||
+                          pathname.startsWith('/customers') ||
+                          pathname.startsWith('/reports');
   
   // Check auth status from the cookies or localStorage
-  const token = request.cookies.get('token')?.value || 
-                (typeof window !== 'undefined' && localStorage.getItem('token'));
+  // Note: localStorage is not accessible in middleware, so we use cookies
+  const token = request.cookies.get('token')?.value;
   
   // If it's a protected route and there's no token, redirect to login
   if (isProtectedRoute && !token) {
