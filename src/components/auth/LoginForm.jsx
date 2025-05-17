@@ -8,8 +8,8 @@ import Button from '../ui/Button';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
-    email: 'test@example.com', // Pre-filled for demo purposes
-    password: 'password123',    // Pre-filled for demo purposes
+    email: 'hr@branddrive.co',
+    password: 'password123',   
     rememberMe: false
   });
   const [error, setError] = useState('');
@@ -18,7 +18,6 @@ const LoginForm = () => {
   const { login } = useAuth();
   const router = useRouter();
   
-  // Check for successful registration message on mount and route changes
   React.useEffect(() => {
     if (router.query.registered === 'true') {
       setRegistrationSuccess(true);

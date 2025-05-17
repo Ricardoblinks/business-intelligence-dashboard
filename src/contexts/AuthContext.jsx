@@ -1,15 +1,13 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { setAuthToken, getAuthToken, removeAuthToken } from '../utils/auth';
 
-// Create auth context
 export const AuthContext = createContext();
 
-// Mock users for testing
 const mockUsers = [
   {
     id: 1,
-    name: 'Test User',
-    email: 'test@example.com',
+    name: 'HR Branddrive',
+    email: 'hr@branddrive.co',
     password: 'password123',
   }
 ];
@@ -21,7 +19,6 @@ export const AuthProvider = ({ children }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
 
-  // Initialize auth state from localStorage on component mount
   useEffect(() => {
     const initializeAuth = () => {
       try {

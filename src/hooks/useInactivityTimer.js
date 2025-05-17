@@ -13,7 +13,6 @@ const useInactivityTimer = (timeout = 60000, enabled = true) => {
   }, [setLastActivity]);
 
   useEffect(() => {
-    // Don't track inactivity if disabled or remember me is enabled
     if (!enabled || rememberMe) return;
 
     const events = [
@@ -26,7 +25,6 @@ const useInactivityTimer = (timeout = 60000, enabled = true) => {
       'keydown'
     ];
     
-    // Add event listeners to reset timer on user activity
     events.forEach(event => {
       window.addEventListener(event, resetTimer);
     });

@@ -6,7 +6,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const router = useRouter();
   const sidebarRef = useRef(null);
   
-  // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target) && !event.target.closest('button[aria-label="Open sidebar"]')) {

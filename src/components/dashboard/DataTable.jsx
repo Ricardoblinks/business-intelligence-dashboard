@@ -7,21 +7,16 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
   
-  // Handle sort clicking
   const handleSort = (columnKey) => {
     if (sortColumn === columnKey) {
-      // Toggle direction if already sorting by this column
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      // Start with ascending sort for new column
       setSortColumn(columnKey);
       setSortDirection('asc');
     }
   };
   
-  // Sort and filter data
   const processedData = useMemo(() => {
-    // First apply search filter
     let filteredData = data;
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
@@ -34,29 +29,24 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
       });
     }
     
-    // Then apply sorting
     if (sortColumn) {
       filteredData = [...filteredData].sort((a, b) => {
         const aValue = a[sortColumn];
         const bValue = b[sortColumn];
         
-        // Handle null or undefined values
         if (aValue === null || aValue === undefined) return sortDirection === 'asc' ? -1 : 1;
         if (bValue === null || bValue === undefined) return sortDirection === 'asc' ? 1 : -1;
         
-        // Compare dates
         if (aValue instanceof Date && bValue instanceof Date) {
           return sortDirection === 'asc' 
             ? aValue.getTime() - bValue.getTime() 
             : bValue.getTime() - aValue.getTime();
         }
         
-        // Compare numbers
         if (typeof aValue === 'number' && typeof bValue === 'number') {
           return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
         }
         
-        // Compare strings
         return sortDirection === 'asc'
           ? String(aValue).localeCompare(String(bValue))
           : String(bValue).localeCompare(String(aValue));
@@ -66,22 +56,19 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
     return filteredData;
   }, [data, columns, searchQuery, sortColumn, sortDirection]);
   
-  // Pagination
   const totalPages = Math.ceil(processedData.length / rowsPerPage);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * rowsPerPage;
     return processedData.slice(start, start + rowsPerPage);
   }, [processedData, currentPage]);
   
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
   
-  // Handle search change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1); 
   };
 
   return (
@@ -154,7 +141,6 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
           
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {loading ? (
-              // Loading state
               Array.from({ length: 5 }).map((_, index) => (
                 <tr key={`loading-${index}`}>
                   {columns.map((column, colIndex) => (
@@ -165,7 +151,6 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
                 </tr>
               ))
             ) : paginatedData.length === 0 ? (
-              // No data state
               <tr>
                 <td
                   colSpan={columns.length}
@@ -175,7 +160,6 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
                 </td>
               </tr>
             ) : (
-              // Data rows
               paginatedData.map((row, rowIndex) => (
                 <tr 
                   key={`row-${rowIndex}`}
@@ -254,7 +238,6 @@ const DataTable = ({ data = [], columns = [], title, loading = false }) => {
                 
                 {/* Page buttons */}
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  // Calculate page number to display
                   let pageNum;
                   if (totalPages <= 5) {
                     pageNum = i + 1;

@@ -2,7 +2,6 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CustomBarChart = ({ data, title, dataKey = 'value', loading = false }) => {
-  // Format y-axis values (numbers)
   const formatYAxis = (value) => {
     if (value >= 1000000) {
       return `${(value / 1000000).toFixed(1)}M`;
@@ -12,7 +11,6 @@ const CustomBarChart = ({ data, title, dataKey = 'value', loading = false }) => 
     return value;
   };
   
-  // Custom tooltip
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -62,13 +60,6 @@ const CustomBarChart = ({ data, title, dataKey = 'value', loading = false }) => 
                 fill="#3b82f6" 
                 radius={[4, 4, 0, 0]} 
                 barSize={30}
-                // Add hover effect
-                onMouseOver={(data, index) => {
-                  document.querySelector(`.bar-${index}`).style.fill = '#2563eb';
-                }}
-                onMouseOut={(data, index) => {
-                  document.querySelector(`.bar-${index}`).style.fill = '#3b82f6';
-                }}
                 className={(_, index) => `bar-${index}`}
               />
             </BarChart>

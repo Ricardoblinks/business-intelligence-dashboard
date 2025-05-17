@@ -4,10 +4,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 const DonutChart = ({ data, title, dataKey = 'value', nameKey = 'name', loading = false }) => {
   const [activeIndex, setActiveIndex] = useState(null);
   
-  // Colors for the pie chart segments
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'];
   
-  // Format values
   const formatValue = (value) => {
     if (value >= 1000000) {
       return `$${(value / 1000000).toFixed(1)}M`;
@@ -17,16 +15,13 @@ const DonutChart = ({ data, title, dataKey = 'value', nameKey = 'name', loading 
     return `$${value}`;
   };
   
-  // Calculate total value for percentage
   const total = data?.reduce((sum, entry) => sum + entry[dataKey], 0) || 0;
   
-  // Calculate percentage
   const getPercentage = (value) => {
     if (!total) return '0%';
     return `${((value / total) * 100).toFixed(1)}%`;
   };
   
-  // Custom tooltip
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const { name, value } = payload[0].payload;
