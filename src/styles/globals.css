@@ -5,6 +5,7 @@
 /* Add custom styles here */
 body {
   @apply antialiased;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Dark mode styling */

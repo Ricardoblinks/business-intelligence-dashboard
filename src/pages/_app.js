@@ -7,23 +7,26 @@ import '../styles/globals.css';
 function MyApp({ Component, pageProps }) {
   // Initialize Mock Service Worker in development
   useEffect(() => {
-    async function initMocks() {
-      if (typeof window === 'undefined' || process.env.NODE_ENV !== 'development') {
+    const initMocks = async () => {
+      if (typeof window === 'undefined') {
         return;
       }
       
-      try {
-        const { worker } = await import('../mocks/browser');
-        if (worker) {
-          await worker.start({
-            onUnhandledRequest: 'bypass',
-          });
-          console.log('MSW initialized successfully');
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const { worker } = await import('../mocks/browser');
+          // Start the MSW worker
+          if (worker) {
+            await worker.start({
+              onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+            });
+            console.log('MSW worker started successfully');
+          }
+        } catch (error) {
+          console.error('Error starting MSW worker:', error);
         }
-      } catch (error) {
-        console.error('MSW initialization failed:', error);
       }
-    }
+    };
     
     initMocks();
   }, []);
@@ -34,7 +37,9 @@ function MyApp({ Component, pageProps }) {
         <title>BizInsight Dashboard</title>
         <meta name="description" content="Business Intelligence Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/* Add favicon */}
         <link rel="icon" href="/favicon.ico" />
+        {/* Add Google Font - Inter */}
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </Head>
       <AuthProvider>
