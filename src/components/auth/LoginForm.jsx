@@ -43,13 +43,10 @@ const LoginForm = () => {
     }
   };
 
-  // For demo purposes, pre-fill with test credentials on mount
+  // For demo purposes, pre-fill with test credentials
   useEffect(() => {
-    // Only fill in development environment
-    if (process.env.NODE_ENV === 'development') {
-      setEmail('test@example.com');
-      setPassword('password123');
-    }
+    setEmail('test@example.com');
+    setPassword('password123');
   }, []);
 
   return (

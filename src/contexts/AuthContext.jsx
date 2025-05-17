@@ -1,8 +1,19 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { setAuthToken, getAuthToken, removeAuthToken } from '../utils/auth';
 
 // Create auth context
 export const AuthContext = createContext();
+
+// Mock users for testing
+const mockUsers = [
+  {
+    id: 1,
+    name: 'Test User',
+    email: 'test@example.com',
+    password: 'password123',
+  }
+];
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -85,33 +96,36 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      // Call the mock API endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, rememberMe: rememberMeOption }),
-      });
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Login failed');
+      // Find user in mock data
+      const foundUser = mockUsers.find(u => u.email === email && u.password === password);
+      
+      if (!foundUser) {
+        throw new Error('Invalid email or password');
       }
       
-      const data = await response.json();
+      // Create mock token
+      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      
+      // Remove password from user data
+      const { password: _, ...userWithoutPassword } = foundUser;
       
       // Set user state and last activity
-      setUser(data.user);
+      setUser(userWithoutPassword);
       setRememberMe(rememberMeOption);
       setLastActivity(Date.now());
       
-      // Store in localStorage if remember me is selected or for session
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('token', data.token);
+      // Store in localStorage
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      localStorage.setItem('token', token);
       localStorage.setItem('rememberMe', rememberMeOption ? 'true' : 'false');
       
-      return data.user;
+      // Set auth token in utils function
+      setAuthToken(token);
+      
+      return userWithoutPassword;
     } catch (err) {
       setError(err.message || 'Login failed');
       throw err;
@@ -125,22 +139,27 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      // Call the mock API endpoint
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, name }),
-      });
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Registration failed');
+      // Check if user already exists
+      if (mockUsers.some(u => u.email === email)) {
+        throw new Error('User already exists');
       }
       
-      const data = await response.json();
-      return data.user;
+      // Create new user
+      const newUser = {
+        id: mockUsers.length + 1,
+        name,
+        email,
+        password,
+      };
+      
+      // Add to mock users (in a real app, this would be an API call)
+      mockUsers.push(newUser);
+      
+      const { password: _, ...userWithoutPassword } = newUser;
+      return userWithoutPassword;
     } catch (err) {
       setError(err.message || 'Registration failed');
       throw err;
@@ -149,29 +168,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const logout = useCallback(async () => {
-    try {
-      // Call the logout API endpoint
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    } catch (error) {
-      console.error('Logout API error:', error);
-    } finally {
-      // Always clear local state regardless of API response
-      setUser(null);
-      setRememberMe(false);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('rememberMe');
-      
-      // Redirect to login page
-      if (typeof window !== 'undefined') {
-        router.push('/login');
-      }
+  const logout = useCallback(() => {
+    // Clear user state
+    setUser(null);
+    setRememberMe(false);
+    
+    // Clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('rememberMe');
+    
+    // Clear auth token
+    removeAuthToken();
+    
+    // Redirect to login page
+    if (typeof window !== 'undefined') {
+      router.push('/login');
     }
   }, [router]);
 

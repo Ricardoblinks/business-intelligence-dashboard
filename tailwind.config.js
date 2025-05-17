@@ -91,14 +91,5 @@ module.exports = {
       },
     },
   },
-  variants: {
-    extend: {
-      backgroundColor: ['active', 'dark', 'dark:hover'],
-      textColor: ['active', 'dark', 'dark:hover'],
-      borderColor: ['active', 'dark', 'dark:hover'],
-      opacity: ['disabled'],
-      cursor: ['disabled'],
-    },
-  },
   plugins: [],
 };
