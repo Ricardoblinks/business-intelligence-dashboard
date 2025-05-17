@@ -10,30 +10,48 @@ export const validatePassword = (password) => {
 
 // For mock API usage
 export const generateToken = () => {
-  return Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+  return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
 };
 
 // For secure storage and retrieval of tokens
 export const setAuthToken = (token) => {
-  localStorage.setItem('token', token);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('token', token);
+    
+    // Also set in cookie for middleware to access
+    document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+  }
 };
 
 export const getAuthToken = () => {
-  return localStorage.getItem('token');
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('token');
+  }
+  return null;
 };
 
 export const removeAuthToken = () => {
-  localStorage.removeItem('token');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('token');
+    
+    // Also remove from cookies
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+  }
 };
 
 // For handling auto logout
 export const getLastActivityTime = () => {
-  const time = localStorage.getItem('lastActivity');
-  return time ? parseInt(time, 10) : null;
+  if (typeof window !== 'undefined') {
+    const time = localStorage.getItem('lastActivity');
+    return time ? parseInt(time, 10) : null;
+  }
+  return null;
 };
 
 export const setLastActivityTime = (time = Date.now()) => {
-  localStorage.setItem('lastActivity', time.toString());
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('lastActivity', time.toString());
+  }
 };
 
 export const checkInactivity = (timeout = 60000) => {

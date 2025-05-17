@@ -11,9 +11,9 @@ export function middleware(request) {
                           pathname.startsWith('/customers') ||
                           pathname.startsWith('/reports');
   
-  // Check auth status from the cookies or localStorage
-  // Note: localStorage is not accessible in middleware, so we use cookies
-  const token = request.cookies.get('token')?.value;
+  // Check auth status from cookies or localStorage
+  // Since localStorage is not accessible in middleware, we use cookies
+  const token = request.cookies.get('token')?.value || '';
   
   // If it's a protected route and there's no token, redirect to login
   if (isProtectedRoute && !token) {

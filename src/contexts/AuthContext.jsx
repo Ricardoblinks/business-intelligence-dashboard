@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/router';
 import { setAuthToken, getAuthToken, removeAuthToken } from '../utils/auth';
 
 // Create auth context
@@ -21,37 +20,40 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
-  const router = useRouter();
 
   // Initialize auth state from localStorage on component mount
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const storedUser = localStorage.getItem('user');
-        const storedToken = getAuthToken();
-        const storedRememberMe = localStorage.getItem('rememberMe') === 'true';
-        const storedLastActivity = localStorage.getItem('lastActivity');
-        
-        if (storedUser && storedToken) {
-          setUser(JSON.parse(storedUser));
-          setRememberMe(storedRememberMe);
+        if (typeof window !== 'undefined') {
+          const storedUser = localStorage.getItem('user');
+          const storedToken = getAuthToken();
+          const storedRememberMe = localStorage.getItem('rememberMe') === 'true';
+          const storedLastActivity = localStorage.getItem('lastActivity');
           
-          if (storedLastActivity) {
-            setLastActivity(parseInt(storedLastActivity, 10));
-          } else {
-            // Initialize lastActivity if not present
-            const now = Date.now();
-            setLastActivity(now);
-            localStorage.setItem('lastActivity', now.toString());
+          if (storedUser && storedToken) {
+            setUser(JSON.parse(storedUser));
+            setRememberMe(storedRememberMe);
+            
+            if (storedLastActivity) {
+              setLastActivity(parseInt(storedLastActivity, 10));
+            } else {
+              // Initialize lastActivity if not present
+              const now = Date.now();
+              setLastActivity(now);
+              localStorage.setItem('lastActivity', now.toString());
+            }
           }
         }
       } catch (err) {
         console.error('Failed to restore auth state:', err);
         // Clear potentially corrupted data
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('rememberMe');
-        localStorage.removeItem('lastActivity');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          localStorage.removeItem('rememberMe');
+          localStorage.removeItem('lastActivity');
+        }
       } finally {
         setLoading(false);
       }
@@ -87,15 +89,16 @@ export const AuthProvider = ({ children }) => {
       
       const now = Date.now();
       setLastActivity(now);
-      localStorage.setItem('lastActivity', now.toString());
       
-      // Store in localStorage
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-      localStorage.setItem('token', token);
-      localStorage.setItem('rememberMe', rememberMeOption ? 'true' : 'false');
-      
-      // Set auth token in utils function
-      setAuthToken(token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+        localStorage.setItem('token', token);
+        localStorage.setItem('rememberMe', rememberMeOption ? 'true' : 'false');
+        localStorage.setItem('lastActivity', now.toString());
+        
+        // Set auth token in utils function
+        setAuthToken(token);
+      }
       
       return userWithoutPassword;
     } catch (err) {
@@ -146,19 +149,16 @@ export const AuthProvider = ({ children }) => {
     setRememberMe(false);
     
     // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('rememberMe');
-    localStorage.removeItem('lastActivity');
-    
-    // Clear auth token
-    removeAuthToken();
-    
-    // Redirect to login page
     if (typeof window !== 'undefined') {
-      router.push('/login');
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('rememberMe');
+      localStorage.removeItem('lastActivity');
+      
+      // Clear auth token
+      removeAuthToken();
     }
-  }, [router]);
+  }, []);
 
   const value = {
     user,
