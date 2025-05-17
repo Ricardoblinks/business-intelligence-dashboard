@@ -23,73 +23,42 @@ export const AuthProvider = ({ children }) => {
   const [lastActivity, setLastActivity] = useState(Date.now());
   const router = useRouter();
 
-  // Check if user is already logged in (from localStorage)
+  // Initialize auth state from localStorage on component mount
   useEffect(() => {
-    const checkAuth = () => {
+    const initializeAuth = () => {
       try {
         const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
+        const storedToken = getAuthToken();
         const storedRememberMe = localStorage.getItem('rememberMe') === 'true';
+        const storedLastActivity = localStorage.getItem('lastActivity');
         
         if (storedUser && storedToken) {
           setUser(JSON.parse(storedUser));
           setRememberMe(storedRememberMe);
-          setLastActivity(Date.now());
+          
+          if (storedLastActivity) {
+            setLastActivity(parseInt(storedLastActivity, 10));
+          } else {
+            // Initialize lastActivity if not present
+            const now = Date.now();
+            setLastActivity(now);
+            localStorage.setItem('lastActivity', now.toString());
+          }
         }
       } catch (err) {
-        console.error('Failed to parse stored user', err);
+        console.error('Failed to restore auth state:', err);
+        // Clear potentially corrupted data
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('rememberMe');
+        localStorage.removeItem('lastActivity');
       } finally {
         setLoading(false);
       }
     };
     
-    checkAuth();
+    initializeAuth();
   }, []);
-
-  // Handle user inactivity - Auto logout feature
-  useEffect(() => {
-    // Don't track inactivity if user isn't logged in or has remember me enabled
-    if (!user || rememberMe) return;
-
-    const resetTimer = () => setLastActivity(Date.now());
-    
-    // Events that reset the inactivity timer
-    const events = [
-      'mousedown', 
-      'mousemove', 
-      'keypress', 
-      'scroll', 
-      'touchstart',
-      'click',
-      'keydown'
-    ];
-    
-    // Add event listeners to reset timer on user activity
-    events.forEach(event => {
-      window.addEventListener(event, resetTimer);
-    });
-
-    // Check for inactivity every 10 seconds
-    const interval = setInterval(() => {
-      const inactiveTime = Date.now() - lastActivity;
-      // Logout after 1 minute of inactivity (60000ms)
-      if (inactiveTime > 60000) {
-        console.log('Auto logout due to inactivity');
-        logout();
-      }
-    }, 10000);
-
-    return () => {
-      // Clean up event listeners and interval
-      events.forEach(event => {
-        window.removeEventListener(event, resetTimer);
-      });
-      clearInterval(interval);
-    };
-  }, [user, rememberMe, lastActivity]);
 
   const login = useCallback(async (email, password, rememberMeOption) => {
     try {
@@ -97,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Find user in mock data
       const foundUser = mockUsers.find(u => u.email === email && u.password === password);
@@ -109,13 +78,16 @@ export const AuthProvider = ({ children }) => {
       // Create mock token
       const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       
-      // Remove password from user data
+      // Remove password from user data for security
       const { password: _, ...userWithoutPassword } = foundUser;
       
       // Set user state and last activity
       setUser(userWithoutPassword);
       setRememberMe(rememberMeOption);
-      setLastActivity(Date.now());
+      
+      const now = Date.now();
+      setLastActivity(now);
+      localStorage.setItem('lastActivity', now.toString());
       
       // Store in localStorage
       localStorage.setItem('user', JSON.stringify(userWithoutPassword));
@@ -140,7 +112,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Check if user already exists
       if (mockUsers.some(u => u.email === email)) {
@@ -177,6 +149,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('rememberMe');
+    localStorage.removeItem('lastActivity');
     
     // Clear auth token
     removeAuthToken();
@@ -195,6 +168,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    lastActivity,
     setLastActivity,
   };
 

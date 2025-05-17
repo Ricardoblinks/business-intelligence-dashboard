@@ -28,7 +28,7 @@ const Dashboard = () => {
   const [categoryData, setCategoryData] = useState([]);
   const { rememberMe } = useAuth();
   
-  // Use the inactivity timer hook if "Keep me logged in" is not checked
+  // Use the inactivity timer hook
   useInactivityTimer(60000, !rememberMe);
   
   // Fetch data on component mount
@@ -37,7 +37,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        // Fetch all data in parallel
+        // Fetch all data in parallel for better performance
         const [users, sales, sessions, trendData, growthData, categoryRevenue] = await Promise.all([
           getUsers(),
           getSales(),
@@ -56,7 +56,7 @@ const Dashboard = () => {
         setCategoryData(categoryRevenue);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        // In a real app, you would handle errors, perhaps show a toast notification
+        // In a real app, you would handle errors properly, perhaps show toast notifications
       } finally {
         setLoading(false);
       }
@@ -65,7 +65,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
   
-  // Format currency
+  // Format currency with proper locale
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -89,7 +89,7 @@ const Dashboard = () => {
       key: 'status',
       label: 'Status',
       render: (value) => (
-        <span className={`status-badge status-${value}`}>
+        <span className={`status-badge status-${value.toLowerCase()}`}>
           {value.charAt(0).toUpperCase() + value.slice(1)}
         </span>
       )

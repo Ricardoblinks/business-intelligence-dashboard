@@ -1,3 +1,4 @@
+// src/hooks/useInactivityTimer.js (improved version)
 import { useState, useEffect, useCallback } from 'react';
 import useAuth from './useAuth';
 
@@ -8,6 +9,7 @@ const useInactivityTimer = (timeout = 60000, enabled = true) => {
   const resetTimer = useCallback(() => {
     const now = Date.now();
     setLastActivity(now);
+    localStorage.setItem('lastActivity', now.toString());
     setIsInactive(false);
   }, [setLastActivity]);
 

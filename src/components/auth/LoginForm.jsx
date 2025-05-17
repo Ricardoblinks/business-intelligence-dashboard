@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AuthLayout from './AuthLayout';
@@ -7,25 +7,37 @@ import Input from '../ui/Input';
 import Button from '../ui/Button';
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [formData, setFormData] = useState({
+    email: 'test@example.com', // Pre-filled for demo purposes
+    password: 'password123',    // Pre-filled for demo purposes
+    rememberMe: false
+  });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   
-  // Check for successful registration message
-  useEffect(() => {
+  // Check for successful registration message on mount and route changes
+  React.useEffect(() => {
     if (router.query.registered === 'true') {
       setRegistrationSuccess(true);
     }
   }, [router.query]);
 
+  const handleChange = useCallback((e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    const { email, password, rememberMe } = formData;
     
     if (!email || !password) {
       setError('Please fill in all fields');
@@ -42,12 +54,6 @@ const LoginForm = () => {
       setIsSubmitting(false);
     }
   };
-
-  // For demo purposes, pre-fill with test credentials
-  useEffect(() => {
-    setEmail('test@example.com');
-    setPassword('password123');
-  }, []);
 
   return (
     <AuthLayout 
@@ -77,8 +83,8 @@ const LoginForm = () => {
             type="email"
             autoComplete="email"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
           />
         </div>
 
@@ -90,22 +96,22 @@ const LoginForm = () => {
             type="password"
             autoComplete="current-password"
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
           />
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <input
-              id="remember-me"
-              name="remember-me"
+              id="rememberMe"
+              name="rememberMe"
               type="checkbox"
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
+              checked={formData.rememberMe}
+              onChange={handleChange}
             />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
               Keep me logged in
             </label>
           </div>
@@ -121,7 +127,7 @@ const LoginForm = () => {
         </div>
         
         <div className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
-          {!rememberMe && (
+          {!formData.rememberMe && (
             <p>
               You will be automatically logged out after 1 minute of inactivity.
             </p>
