@@ -5,26 +5,25 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
-  // Initialize Mock Service Worker in development
+  // Initialize Mock Service Worker in both development and production
   useEffect(() => {
     const initMocks = async () => {
       if (typeof window === 'undefined') {
         return;
       }
       
-      if (process.env.NODE_ENV === 'development') {
-        try {
-          const { worker } = await import('../mocks/browser');
-          // Start the MSW worker
-          if (worker) {
-            await worker.start({
-              onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-            });
-            console.log('MSW worker started successfully');
-          }
-        } catch (error) {
-          console.error('Error starting MSW worker:', error);
+      // No environment check - allow mocks in all environments
+      try {
+        const { worker } = await import('../mocks/browser');
+        // Start the MSW worker
+        if (worker) {
+          await worker.start({
+            onUnhandledRequest: 'bypass'
+          });
+          console.log('MSW worker started successfully');
         }
+      } catch (error) {
+        console.error('Error starting MSW worker:', error);
       }
     };
     
@@ -37,7 +36,6 @@ function MyApp({ Component, pageProps }) {
         <title>BizInsight Dashboard</title>
         <meta name="description" content="Business Intelligence Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        {/* Add favicon */}
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <AuthProvider>
