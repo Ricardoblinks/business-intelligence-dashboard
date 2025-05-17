@@ -15,10 +15,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx msw init public --save && next build",
     "start": "next start",
     "lint": "next lint",
-    "reinstall": "rm -rf node_modules && rm -rf .next && npm install"
+    "reinstall": "rm -rf node_modules && rm -rf .next && npm 
   },
   "dependencies": {
     "next": "13.4.12",
