@@ -18,7 +18,7 @@
     "build": "npx msw init public --save && next build",
     "start": "next start",
     "lint": "next lint",
-    "reinstall": "rm -rf node_modules && rm -rf .next && npm 
+    "reinstall": "rm -rf node_modules && rm -rf .next && npm install"
   },
   "dependencies": {
     "next": "13.4.12",
