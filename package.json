@@ -27,7 +27,6 @@
     "recharts": "^2.7.2"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.11.1",
     "@tailwindcss/postcss": "^4.1.7",
     "autoprefixer": "^10.4.21",
     "eslint": "8.45.0",
