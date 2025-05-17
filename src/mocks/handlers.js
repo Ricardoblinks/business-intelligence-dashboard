@@ -1,222 +1,112 @@
-// src/mocks/handlers.js
-// API request handlers for Mock Service Worker
-
-import { rest } from 'msw';
-
-// Mock database
-const mockUsers = [
-  {
-    id: 1,
-    name: 'Test User',
-    email: 'test@example.com',
-    password: 'password123',
-  }
-];
-
-// Helper function to generate token
-const generateToken = () => {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+const simulateDelay = async (minMs = 300, maxMs = 800) => {
+  const delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+  await new Promise(resolve => setTimeout(resolve, delay));
 };
 
-export const handlers = [
-  // Login handler
-  rest.post('/api/auth/login', (req, res, ctx) => {
-    const { email, password, rememberMe } = req.body;
+// Get users data
+export const getUsers = async () => {
+  try {
+    await simulateDelay();
+    const response = await fetch('/api/users');
     
-    // Find user
-    const user = mockUsers.find(u => u.email === email);
-    
-    // Check credentials
-    if (!user || user.password !== password) {
-      return res(
-        ctx.status(401),
-        ctx.json({ error: 'Invalid email or password' })
-      );
+    if (!response.ok) {
+      throw new Error('Failed to fetch users data');
     }
     
-    // Generate token
-    const token = generateToken();
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+};
+
+// Get sales data
+export const getSales = async () => {
+  try {
+    await simulateDelay();
+    const response = await fetch('/api/sales');
     
-    return res(
-      ctx.status(200),
-      ctx.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000, // 30 days or 1 hour
-      }),
-      ctx.json({
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
-        token,
-        rememberMe
-      })
-    );
-  }),
-  
-  // Register handler
-  rest.post('/api/auth/register', (req, res, ctx) => {
-    const { email, password, name } = req.body;
-    
-    // Check if user already exists
-    if (mockUsers.some(u => u.email === email)) {
-      return res(
-        ctx.status(400),
-        ctx.json({ error: 'User already exists' })
-      );
+    if (!response.ok) {
+      throw new Error('Failed to fetch sales data');
     }
     
-    // Create new user
-    const newUser = {
-      id: mockUsers.length + 1,
-      name,
-      email,
-      password,
-    };
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching sales:', error);
+    throw error;
+  }
+};
+
+// Get sessions data
+export const getSessions = async () => {
+  try {
+    await simulateDelay();
+    const response = await fetch('/api/sessions');
     
-    mockUsers.push(newUser);
+    if (!response.ok) {
+      throw new Error('Failed to fetch sessions data');
+    }
     
-    return res(
-      ctx.status(201),
-      ctx.json({
-        user: {
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
-        }
-      })
-    );
-  }),
-  
-  // Logout handler
-  rest.post('/api/auth/logout', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.cookie('token', '', {
-        httpOnly: true,
-        expires: new Date(0),
-      }),
-      ctx.json({ success: true })
-    );
-  }),
-  
-  // Users API
-  rest.get('/api/users', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        total: 1247,
-        active: 843,
-        new: 127,
-        data: [
-          { id: 1, name: 'John Smith', email: 'john@example.com', status: 'active', registeredDate: '2024-02-15', lastLogin: '2025-05-10' },
-          { id: 2, name: 'Alice Johnson', email: 'alice@example.com', status: 'active', registeredDate: '2024-03-21', lastLogin: '2025-05-14' },
-          { id: 3, name: 'Robert Davis', email: 'robert@example.com', status: 'inactive', registeredDate: '2024-01-10', lastLogin: '2025-04-30' },
-          { id: 4, name: 'Emma Wilson', email: 'emma@example.com', status: 'active', registeredDate: '2024-04-05', lastLogin: '2025-05-13' },
-          { id: 5, name: 'Michael Brown', email: 'michael@example.com', status: 'active', registeredDate: '2024-02-28', lastLogin: '2025-05-12' },
-          { id: 6, name: 'Sophia Miller', email: 'sophia@example.com', status: 'pending', registeredDate: '2024-05-02', lastLogin: null },
-          { id: 7, name: 'David Garcia', email: 'david@example.com', status: 'active', registeredDate: '2024-03-15', lastLogin: '2025-05-09' },
-          { id: 8, name: 'Olivia Martinez', email: 'olivia@example.com', status: 'active', registeredDate: '2024-01-20', lastLogin: '2025-05-11' },
-          { id: 9, name: 'James Lee', email: 'james@example.com', status: 'inactive', registeredDate: '2024-04-12', lastLogin: '2025-04-25' },
-          { id: 10, name: 'Ava Robinson', email: 'ava@example.com', status: 'active', registeredDate: '2024-02-10', lastLogin: '2025-05-14' },
-        ]
-      })
-    );
-  }),
-  
-  // Sales API
-  rest.get('/api/sales', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        total: 587490.50,
-        thisMonth: 128750.75,
-        lastMonth: 116280.25,
-        growth: 10.7,
-        data: [
-          { id: 1, customer: 'Acme Corp', amount: 5280.50, date: '2025-05-14', status: 'completed' },
-          { id: 2, customer: 'Globex Inc', amount: 3750.00, date: '2025-05-13', status: 'completed' },
-          { id: 3, customer: 'Wayne Enterprises', amount: 12500.75, date: '2025-05-12', status: 'completed' },
-          { id: 4, customer: 'Stark Industries', amount: 8900.25, date: '2025-05-10', status: 'completed' },
-          { id: 5, customer: 'Umbrella Corp', amount: 4320.80, date: '2025-05-09', status: 'pending' },
-          { id: 6, customer: 'Oscorp', amount: 6720.30, date: '2025-05-08', status: 'completed' },
-          { id: 7, customer: 'Cyberdyne Systems', amount: 9450.00, date: '2025-05-06', status: 'completed' },
-          { id: 8, customer: 'Initech', amount: 2300.45, date: '2025-05-05', status: 'failed' },
-          { id: 9, customer: 'Massive Dynamic', amount: 15780.90, date: '2025-05-03', status: 'completed' },
-          { id: 10, customer: 'Soylent Corp', amount: 7850.60, date: '2025-05-01', status: 'completed' },
-        ]
-      })
-    );
-  }),
-  
-  // Sessions API
-  rest.get('/api/sessions', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        total: 5837,
-        active: 134,
-        average: 12.5, // minutes
-      })
-    );
-  }),
-  
-  // Sales Trend API
-  rest.get('/api/sales/trend', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json([
-        { month: 'May 2024', sales: 92300 },
-        { month: 'Jun 2024', sales: 98500 },
-        { month: 'Jul 2024', sales: 104200 },
-        { month: 'Aug 2024', sales: 99800 },
-        { month: 'Sep 2024', sales: 105700 },
-        { month: 'Oct 2024', sales: 110300 },
-        { month: 'Nov 2024', sales: 118200 },
-        { month: 'Dec 2024', sales: 125800 },
-        { month: 'Jan 2025', sales: 103400 },
-        { month: 'Feb 2025', sales: 110900 },
-        { month: 'Mar 2025', sales: 116280 },
-        { month: 'Apr 2025', sales: 128750 },
-      ])
-    );
-  }),
-  
-  // User Growth API
-  rest.get('/api/users/growth', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json([
-        { month: 'May 2024', users: 520 },
-        { month: 'Jun 2024', users: 590 },
-        { month: 'Jul 2024', users: 645 },
-        { month: 'Aug 2024', users: 690 },
-        { month: 'Sep 2024', users: 740 },
-        { month: 'Oct 2024', users: 790 },
-        { month: 'Nov 2024', users: 850 },
-        { month: 'Dec 2024', users: 920 },
-        { month: 'Jan 2025', users: 980 },
-        { month: 'Feb 2025', users: 1050 },
-        { month: 'Mar 2025', users: 1120 },
-        { month: 'Apr 2025', users: 1247 },
-      ])
-    );
-  }),
-  
-  // Revenue by Category API
-  rest.get('/api/revenue/categories', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json([
-        { name: 'Software Licenses', value: 235000 },
-        { name: 'Consulting Services', value: 187500 },
-        { name: 'Support & Maintenance', value: 98000 },
-        { name: 'Training', value: 42000 },
-        { name: 'Custom Development', value: 125000 },
-      ])
-    );
-  }),
-];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    throw error;
+  }
+};
+
+// Get sales trend data
+export const getSalesTrend = async () => {
+  try {
+    await simulateDelay();
+    const response = await fetch('/api/sales/trend');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch sales trend data');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching sales trend:', error);
+    throw error;
+  }
+};
+
+// Get user growth data
+export const getUserGrowth = async () => {
+  try {
+    await simulateDelay();
+    const response = await fetch('/api/users/growth');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch user growth data');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user growth:', error);
+    throw error;
+  }
+};
+
+// Get revenue by category data
+export const getRevenueByCategory = async () => {
+  try {
+    await simulateDelay();
+    const response = await fetch('/api/revenue/categories');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch revenue category data');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching revenue by category:', error);
+    throw error;
+  }
+};
+
+// Helper function to simulate API errors (for testing error handling)
+export const simulateError = async () => {
+  await simulateDelay(500, 500);
+  throw new Error('API error simulation');
+};

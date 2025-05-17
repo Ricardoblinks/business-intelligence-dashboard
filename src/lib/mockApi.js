@@ -1,7 +1,3 @@
-// src/lib/mockApi.js
-// Mock API service for our BI dashboard
-
-// Helper function to simulate API call delay
 const simulateDelay = async (minMs = 300, maxMs = 800) => {
   const delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
   await new Promise(resolve => setTimeout(resolve, delay));

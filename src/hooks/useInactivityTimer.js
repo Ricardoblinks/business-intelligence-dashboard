@@ -1,4 +1,3 @@
-// src/hooks/useInactivityTimer.js (improved version)
 import { useState, useEffect, useCallback } from 'react';
 import useAuth from './useAuth';
 
